@@ -1,27 +1,50 @@
-import { Statement } from '../entities/Statement';
+import { OperationType, Statement } from '../entities/Statement';
 
-export class BalanceMap {
-  static toDTO({
-    statement,
-    balance,
-  }: {
-    statement: Statement[];
-    balance: number;
-  }) {
+interface IBalanceMapDTO {
+  statement: Statement[];
+  balance: number;
+  source_user_id: string;
+}
+
+/* eslint-disable no-nested-ternary */
+class BalanceMap {
+  static toDTO({ statement, balance, source_user_id }: IBalanceMapDTO) {
     const parsedStatement = statement.map(
-      ({ id, amount, description, type, created_at, updated_at }) => ({
+      ({
         id,
-        amount: Number(amount),
+        user_id,
+        sender_id,
+        amount,
         description,
         type,
         created_at,
         updated_at,
-      })
+      }) => {
+        const description_detail =
+          type === OperationType.TRANSFER
+            ? user_id === source_user_id
+              ? 'IN'
+              : 'OUT'
+            : undefined;
+
+        return {
+          id,
+          sender_id: sender_id || undefined,
+          amount,
+          type,
+          description,
+          description_detail,
+          created_at,
+          updated_at,
+        };
+      }
     );
 
     return {
       statement: parsedStatement,
-      balance: Number(balance),
+      balance,
     };
   }
 }
+
+export { BalanceMap };

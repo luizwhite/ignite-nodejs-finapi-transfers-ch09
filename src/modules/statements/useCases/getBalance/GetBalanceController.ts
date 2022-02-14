@@ -10,9 +10,12 @@ export class GetBalanceController {
 
     const getBalance = container.resolve(GetBalanceUseCase);
 
-    const balance = await getBalance.execute({ user_id });
+    const balanceData = await getBalance.execute({ user_id });
 
-    const balanceDTO = BalanceMap.toDTO(balance);
+    const balanceDTO = BalanceMap.toDTO({
+      ...balanceData,
+      source_user_id: user_id,
+    });
 
     return response.json(balanceDTO);
   }
